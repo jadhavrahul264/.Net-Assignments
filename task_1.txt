@@ -1,0 +1,149 @@
+/* Question_1:
+Create class calculator with two method Add and product. 
+ * Create object and call method
+*/
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApp1
+{
+    internal class Calculator
+    {
+     public int add(int x, int y)
+        {
+            return (x + y);
+         }
+    public int product(int x, int y)
+        {
+            return ( x * y);
+        }
+    }
+    class demo
+    {
+        public static void Main(string[] args)
+        {
+            Calculator c = new Calculator();
+            Console.WriteLine("Addiation of two number: "+c.add(1, 2));
+            Console.WriteLine("Product of two numbers: "+c.product(8, 2));
+        }
+    }
+}
+-----------------------------------------------------------------------------------------------------------------------------
+/*
+Question_2:
+Create class library with method fact() which will return factorial of a number. Use it in console application
+*/
+
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ClassLibrary1
+{
+    public class Class1
+    {
+       public int fact(int x)
+        {
+            int f = 1;
+            for(int i = 2; i <= x; i++) 
+            {
+                f = f * i;
+
+            }
+            return f;
+        }
+
+    }
+}
+-----------------------------------------------------------------------------------------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using ClassLibrary1;
+namespace ConsoleApp4
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            Class1 c1 = new Class1();
+            int f = c1.fact(5);
+            Console.WriteLine(f); 
+        }
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------------------------
+Question no:3
+
+
+/*Create a class student in namespace DAC and in namespace DBDA write method add in both class.
+  In entry point call both method
+*/
+
+
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DAC
+{
+    internal class Student
+    {
+        public int Add(int x,int y )
+        {
+              return(x+y);    
+            
+        }
+    }
+}
+namespace DBDA
+{
+    class Student
+    {
+        public int Add(int x, int y)
+        {
+            return (x + y);
+        }
+        static void Main(string[] args)
+        {
+            DAC.Student dacStudent = new DAC.Student();
+            DBDA.Student dbdaStudent = new DBDA.Student();
+            
+            int c=dacStudent.Add(20, 10);
+            int d=dbdaStudent.Add(30, 20);
+            Console.WriteLine("c= "+c+"  d= "+ d);
+
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
