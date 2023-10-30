@@ -1,0 +1,112 @@
+/*
+Q1.Accept two number from user and do the sum of it
+*/
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+/*
+Accept two number from user and do the sum of it
+*/
+namespace ConsoleApp3
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            String num1, num2;
+            int a;
+            int b;
+            Console.WriteLine("Enter a num1:  ");
+            num1 = Console.ReadLine();
+            Console.WriteLine("Enter a num2:  ");
+            num2 = Console.ReadLine();
+            a=int.Parse(num1);
+            b=int.Parse(num2);
+            Console.WriteLine("Result={0}",a+b);
+
+        }
+    }
+}
+
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+/*Q2. Accept a float value and print square of that number
+ * Solve above code using Parse(), ToSingle() and TryPrase() method.
+Also observe exception if you do not enter valid data
+
+*/
+namespace ConsoleApp3
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            String num1;
+            float a;
+            Console.WriteLine("Enter a number:  ");
+            num1=Console.ReadLine();
+
+           // a =float.Parse(num1);
+           // Console.WriteLine("Squre of number: " + a*a);
+
+            //bool b=float.TryParse(num1, out a);
+           // Console.WriteLine("Squre of number: " + a*a);
+
+             a = Convert.ToSingle(num1);
+            Console.WriteLine("Squre of number:  "+ a*a);
+
+        }
+    }
+}
+
+
+/*
+Q.3
+ * Create a class calculator and write 3 instance method square, cube, round[if in put 22.5 o/p 22]
+Which will return square .cube and rounded number.
+Create object and call method and print the result.
+
+ */
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApp3
+{
+     class Calculator
+    {
+        public void square(float a)
+        {
+            Console.WriteLine("Square of number is: "+ a*a);
+        }
+        public void cube(float a)
+        {
+            Console.WriteLine("Cube of number is: " + a * a * a );
+        }
+        public void Roundof(float a)
+        {
+            Console.WriteLine("Round is : " + Convert.ToInt32(a));
+
+        }
+        public static void Main(string[] args) { 
+            Calculator calculator = new Calculator();
+            calculator.square(2.5f);
+            calculator.cube(3.0f);
+            calculator.Roundof(24.5f);
+
+
+        }
+    }
+}
+
