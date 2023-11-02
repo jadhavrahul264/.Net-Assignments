@@ -1,0 +1,148 @@
+
+/*
+Create abstract class Employee having member id, name, salary, netsalary
+It has method givebasic_salary which will set netsalary after deduction 10%TDS
+ it has abstract method givebonus
+Id should be autoincrement and should be readonly property
+Write getter setter for name and salary
+Salary can be set only by child class
+Create two child class permanentEmp and tempEmp
+permanentEmp get bonus of 10%[declare this as static veriable ]
+const maxsalay= 150000.
+Ensure that you are not paying more then 150000 to any employee
+Bonus for tempEmp is 5% of the basic salary.
+When you load application it should print name of company
+When you give salary it should give SMS and Email to the employee.
+Crate Array of Employee and store all child class object.
+-- >
+*/
+
+namespace delegateDemo
+{
+    delegate void Display(int id, string name, double salary);
+    abstract class Empolyee
+    {
+        private int id;
+        private String name;
+        private double salary;
+        private double netsalary;
+        static double TDS = 0.1;
+        static double bonus = 0.1;
+        static int getid;
+        public event Display SomeEvent;
+        static Empolyee()
+        {
+            Console.WriteLine("danfoss pvt.itd.");
+
+        }
+        public Empolyee(String name, double salary)
+        {
+            id = ++getid;
+            Name = name;
+            Salary = salary;
+            if (salary > 150000)
+            {
+                throw new Exception("error");
+
+            }
+            else
+            {
+                Salary = salary;
+            }
+
+        }
+        public int ID
+        {
+            get { return id; }
+        }
+        public string Name
+        {
+            get { return name; }
+            set { name = value; }
+        }
+        public double Salary
+        {
+            set { salary = value; }
+            get { return salary; }
+        }
+        public void basic_salary()
+        {
+            Salary = Salary - Salary * TDS;
+            netsalary = salary;
+
+        }
+        public abstract void givebonus();
+        public void OnSomeEvent(int id, String name, double salary)
+        {
+            if (SomeEvent != null)
+            {
+                SomeEvent(id, name, netsalary);
+            }
+
+        }
+
+    }
+    class permanentEmp : Empolyee
+    {
+        static double bonus = 0.1;
+        public permanentEmp(string name, double netsalary) : base(name, netsalary)
+        {
+            
+        }
+        public override void givebonus()
+        {
+            Salary = Salary + Salary * bonus;
+            OnSomeEvent(ID, Name, Salary);
+        }
+
+
+    }
+    class tempEmp : Empolyee
+    {
+        static double bonus = 0.5;
+        public tempEmp(String name, double salary) : base(name, salary)
+        {
+        }
+        public override void givebonus()
+        {
+            Salary += Salary * bonus;   
+            OnSomeEvent(ID , Name, Salary);
+        }
+    }
+    class message1
+    {
+        public void Email(int id,String name,double netsalary)
+        {
+            Console.WriteLine("Email id:{0}name:{1}:salary{2}",id,name,netsalary);
+        }
+        public void Sms(int id, String name, double netsalary)
+        {
+            Console.WriteLine("Sms id:{0}name:{1}:salary{2}", id, name, netsalary);
+        }
+
+
+    }
+    class EmpDemo
+    {
+        public static void Main(string[] args)
+        {
+            message1 m1 = new message1();
+            Empolyee[] arr = new Empolyee[2];
+            arr[0] = new permanentEmp("A", 1000);
+            arr[1] = new permanentEmp("B", 1000);
+
+            for(int i = 0;i<arr.Length;i++) 
+            {
+                arr[i].SomeEvent += m1.Email;
+                arr[i].SomeEvent += m1.Sms;
+            }
+            arr[0].basic_salary();
+            arr[0].givebonus();
+            arr[1].basic_salary ();
+
+
+        }
+    }
+
+
+}
