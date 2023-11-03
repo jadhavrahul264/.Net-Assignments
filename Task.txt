@@ -1,0 +1,118 @@
+Task:
+Create two static methd
+ a.  Public static int add(int a,int b) ==return sum of two number
+b. .  Public static int product(int a,int b)==return a*b;
+Declare delegate which can point to this method.
+Using reference of delegate call this method and print result
+
+Task
+Solve above program by making above method as instance method.
+->using static method
+namespace delegateDemo
+{
+    
+    delegate int mysqr (int x,int y);//delegate delcartion
+    internal class DelegateDemo
+    {
+
+        public static int Add(int a, int b)
+        {
+            return a + b;
+        }
+        public static int product(int a, int b)
+        {
+            return a * b;
+        }
+
+        static void Main(string[] args)
+        {
+           
+            mysqr my = new mysqr(Add);//careating delegate objects
+             my = product;
+           
+
+            int a= my(10,20);
+            int b = my(10,20);
+            Console.WriteLine(a+" "+b);
+
+        }
+    }
+}
+//using instance method
+namespace delegateDemo
+{
+    
+    delegate int mysqr (int x,int y);//delegate delcartion
+    internal class DelegateDemo
+    {
+
+        public  int Add(int a, int b)
+        {
+            return a + b;
+        }
+        public  int product(int a, int b)
+        {
+            return a * b;
+        }
+
+        static void Main(string[] args)
+        {
+            DelegateDemo del = new DelegateDemo();
+            mysqr my = new mysqr(del.Add);//careating delegate objects
+             my = del.product;
+           
+
+            int a= my(10,20);
+            int b = my(10,20);
+            Console.WriteLine(a+" "+b);
+
+        }
+    }
+}
+*----------------------------------------------------------------------------------------------------------
+Task:
+Create class mymath having instance member a,b
+Create two instance method
+ a.  Public int add() ==return sum of two number
+b. .  Public int product()==return a*b;
+
+Declare delegate which can point to this method.
+Using reference of delegate call this method and print result
+-->
+
+namespace delegateDemo
+{
+    
+    delegate int mysqr ();//delegate delcartion
+    internal class DelegateDemo
+    {
+        int a, b;
+        public DelegateDemo(int a,int b)
+        {
+            this.a = a;
+            this.b = b;
+
+        }
+        public  int Add()
+        {
+            return a + b;
+        }
+        public  int product()
+        {
+            return a * b;
+        }
+
+        static void Main(string[] args)
+        {
+            DelegateDemo del = new DelegateDemo(10,20);
+            mysqr my = new mysqr(del.Add);//careating delegate objects
+             my = del.product;
+           
+
+            int a= my();
+            int b = my();
+            Console.WriteLine(a+" "+b);
+
+        }
+    }
+}
