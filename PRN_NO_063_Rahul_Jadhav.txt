@@ -1,0 +1,631 @@
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Name : Rahul Jadhav
+PRN no : 063
+
+
+
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::      Question 1:        :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+@@ Model Folder @@
+
+Employee Class: 
+
+namespace OpenBookTask01.Models
+{
+    public class Employee
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
+    }
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+using Microsoft.EntityFrameworkCore;
+
+namespace OpenBookTask01.Models
+{
+    public class EmployeeDbContext : DbContext
+    {
+        public EmployeeDbContext(DbContextOptions<EmployeeDbContext> options)
+             : base(options)
+        {
+        }
+
+        public DbSet<Employee> Employee { get; set; }
+    }
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+namespace OpenBookTask01.Models
+{
+    public class EmployeeRepository : IEmployeeRepository
+    {
+        private readonly EmployeeDbContext context;
+
+        public EmployeeRepository(EmployeeDbContext context)
+        {
+            this.context = context;
+        }
+        public Employee Add(Employee employee)
+        {
+            context.Employee.Add(employee);
+            context.SaveChanges();
+            return employee;
+        }
+
+        public Employee Delete(int Id)
+        {
+            Employee employee = context.Employee.Find(Id);
+            if (employee != null)
+            {
+                context.Employee.Remove(employee);
+                context.SaveChanges();
+            }
+            return employee;
+        }
+        public IEnumerable<Employee> GetAllEmployee()
+        {
+            return context.Employee;
+        }
+
+        public Employee GetEmployee(int Id)
+        {
+            return context.Employee.Find(Id);
+        }
+
+        public Employee Update(Employee employeeChanges)
+        {
+            var employee = context.Employee.Attach(employeeChanges);
+            employee.State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+            // context.Update(employee);
+            context.SaveChanges();
+            return employeeChanges;
+        }
+    }
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+namespace OpenBookTask01.Models
+{
+    public interface IEmployeeRepository
+    {
+        Employee GetEmployee(int Id);
+        IEnumerable<Employee> GetAllEmployee();
+        Employee Add(Employee employee);
+        Employee Update(Employee employeeChanges);
+        Employee Delete(int Id);
+    }
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+@@_Controller Class_@@
+:::::::::::::::::::::::::::::
+
+
+using Microsoft.AspNetCore.Mvc;
+using OpenBookTask01.Models;
+
+namespace OpenBookTask01.Controllers
+{
+    public class EmployeeController : Controller
+    {
+        private IEmployeeRepository _employeeRepository;
+
+        public EmployeeController(IEmployeeRepository _employeeRepository)
+        {
+            this._employeeRepository = _employeeRepository;
+        }
+
+        public IActionResult Index()
+        {
+            var model = _employeeRepository.GetAllEmployee();
+            return View(model);
+        }
+
+        public ActionResult Details(int id)
+        {
+            var model = _employeeRepository.GetEmployee(id);
+            return View(model);
+        }
+
+        public ActionResult Create()
+        {
+            return View();
+        }
+        // POST: EmployeeController/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Create(Employee employee)
+        {
+            try
+            {
+                var model = _employeeRepository.Add(employee);
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+        public ActionResult Edit(int id)
+        {
+            var model = _employeeRepository.GetEmployee(id);
+            return View(model);
+        }
+
+        // POST: EmployeeController/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit(int id, Employee emp)
+        {
+            try
+            {
+                var model = _employeeRepository.Update(emp);
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+        public ActionResult Delete(int id)
+        {
+            var model = _employeeRepository.GetEmployee(id);
+            return View(model);
+
+        }
+
+        // POST: EmployeeController/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(int id, IFormCollection collection)
+        {
+            try
+            {
+                var model = _employeeRepository.Delete(id);
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+
+    }
+}
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+@@-Program.cs Class-@@
+
+
+using Microsoft.EntityFrameworkCore;
+using OpenBookTask01.Models;
+
+namespace OpenBookTask01
+{
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            var builder = WebApplication.CreateBuilder(args);
+
+            // Add services to the container.
+            builder.Services.AddControllersWithViews();
+            builder.Services.AddDbContext<EmployeeDbContext>(
+                options => options.UseSqlServer(builder.Configuration.GetConnectionString("cw")));
+            
+            builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+
+            var app = builder.Build();
+
+            // Configure the HTTP request pipeline.
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+
+            app.UseAuthorization();
+
+            app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            app.Run();
+        }
+    }
+}
+
+
+
+                 :::::::::::::::::::::::::::::        Question no: 2             ::::::::::::::::::::::::::::
+
+
+
+--Model Folder--
+___________________
+
+namespace OpenBookTestTask02.Models
+{
+    public class UserLogin
+    {
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public bool Remember { get; set; }
+    }
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+@-Controller Folder-@
+___________________
+using Microsoft.AspNetCore.Mvc;
+
+namespace OpenBookTestTask02.Controllers
+{
+    public class SessionController : Controller
+    {
+        public string SessionEmail = "Email";
+        public string SessionPass = "Password";
+        public IActionResult Index()
+        {
+            ViewBag.Email = HttpContext.Session.GetString(SessionEmail);
+            return View();
+        }
+
+        public IActionResult Home()
+        {
+            return View();
+        }
+
+        public IActionResult Contact()
+        {
+            return View();
+        }
+
+        public IActionResult HrData()
+        {
+            ViewBag.Email = HttpContext.Session.GetString(SessionEmail);
+            ViewBag.Pass = HttpContext.Session.GetString(SessionPass);
+            if (ViewBag.Email == null && ViewBag.Pass == null)
+            {
+                return RedirectToAction(nameof(Create));
+            }
+            return View();
+        }
+        public IActionResult Create()
+        {
+            ViewBag.Email = HttpContext.Session.GetString(SessionEmail);
+            ViewBag.Pass = HttpContext.Session.GetString(SessionPass);
+            if (ViewBag.Email != null && ViewBag.Pass != null)
+            {
+                return RedirectToAction(nameof(Create));
+            }
+            return View();
+        }
+        [HttpPost]
+        public ActionResult Create(Models.UserLogin user)
+        {
+            if (ModelState.IsValid)
+            {
+                if (user.Email == "abhi@123.com" && user.Password == "abhi")
+                {
+                    HttpContext.Session.SetString(SessionEmail, user.Email);
+                    HttpContext.Session.SetString(SessionPass, user.Password);
+                    return RedirectToAction(nameof(Index));
+
+
+                }
+                else
+                {
+                    ModelState.AddModelError("Email", "InValid data");
+
+                    return View();
+                }
+            }
+            return View();
+        }
+
+        public ActionResult Logout()
+        {
+            HttpContext.Session.Remove(SessionEmail);
+            HttpContext.Session.Remove(SessionPass);
+
+            HttpContext.Session.Clear();
+            return RedirectToAction(nameof(Index));
+        }
+    }
+}
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+--Program.cs Class--
+_____________________
+
+namespace OpenBookTestTask02
+{
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            var builder = WebApplication.CreateBuilder(args);
+
+            
+            builder.Services.AddControllersWithViews();
+            builder.Services.AddSession();
+            var app = builder.Build();
+
+            
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+            app.UseSession();
+            app.UseAuthorization();
+
+            app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            app.Run();
+        }
+    }
+}
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+@-Shared Folder-@
+__________________
+
+_Layout.cshtml:
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - OpenBookTestTask02</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/OpenBookTestTask02.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">OpenBookTestTask02</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Session" asp-action="Home">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Session" asp-action="Contact">Contact Us</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Session" asp-action="HrData">Hr Data</a>
+                        </li>
+                        @using Microsoft.AspNetCore.Http;
+                        @if (Context.Session.GetString("Email") == null)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Session" asp-action="Create">Login</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Session" asp-action="Logout">Logout</a>
+                            </li>
+                        }
+
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2023 - OpenBookTestTask02 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+
+
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::           Question 3                :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+--Model Folder--
+_________________
+
+namespace OpenBookTestTask02.Models
+{
+    public class UserLogin
+    {
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public bool Remember { get; set; }
+    }
+}
+__________________________________________________________
+--Controller Folder--
+__________________________
+
+using Microsoft.AspNetCore.Mvc;
+using SessionPractice.Models;
+
+namespace SessionPractice.Controllers
+{
+    public class CookieController : Controller
+    {
+        public IActionResult Index()
+        {
+            ViewBag.Email = Request.Cookies["Ukey"]?.ToString();
+            
+            return View();
+        }
+
+        public IActionResult Create()
+        {
+            Models.User user = null;
+            var cookieValue = Request.Cookies["Ukey"]?.ToString();
+            if(cookieValue != null)
+            {
+                user= new Models.User();
+                user.Email = cookieValue;
+            }
+            return View(user);
+        }
+        [HttpPost]
+        public IActionResult Create(Models.User user)
+        {
+            if(ModelState.IsValid)
+            {
+                if(user.Email=="abhi@123.com" && user.Remember == true)
+                {
+                    CookieOptions cookie = new CookieOptions();
+                    cookie.Expires= DateTime.Now.AddDays(1);
+                    Response.Cookies.Append("Ukey", user.Email, cookie);
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    ModelState.AddModelError("Email", "invalid data");
+                    return View();
+                }
+            }
+            else
+            {
+                return View();
+            }
+        }
+
+        public IActionResult Logout()
+        {
+            CookieOptions cookie = new CookieOptions();
+            cookie.Expires = DateTime.Now.AddDays(-1);
+            Response.Cookies.Append("Ukey", "", cookie);
+            return RedirectToAction("Index");
+        }
+
+    }
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+--_Layout.cshtml--
+_____________________
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Cookie</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Cookie.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Cookie</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                        @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+                        @{
+                            var yourCookie = HttpContextAccessor.HttpContext.Request.Cookies["Ukey"];
+                        }
+
+                        @if (yourCookie != null)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Login" asp-action="Logout">Logout</a>
+                            </li>
+                        }
+                        else
+                        {
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Login" asp-action="Create">Login</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2023 - Cookie - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+
+
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
