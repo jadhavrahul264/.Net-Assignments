@@ -1,0 +1,23 @@
+[Q1]
+namespace ConsoleApp3
+{
+    internal class Calculator
+    {
+        public int add(int a, int b)
+        {
+            return (a + b);
+        }
+        public int product(int a, int b)
+        {
+            return (a  b);
+        }
+    }
+    public class myclass
+    {
+        static void main()
+        {
+            Calculator c = new Calculator();
+            Console.WriteLine(Addition of two numbers=  + c.add(10, 20));
+        }
+    }
+}
